@@ -72,11 +72,17 @@ app.delete("/ads/:id", (req, res) => {
 });
 
 app.patch("/ads/:id", (req, res) => {
-    const adId = parseInt(req.params.id);
-    const adToUpdate = ads.find(ad => ad.id === adId);
-    if (!adToUpdate) return res.status(404);
-    Object.assign(adToUpdate, req.body);
-    res.send("Ad updated");
+  const id = parseInt(req.params.id);
+  db.run(
+    "UPDATE ads SET title=$title, price=$price WHERE id = $id",
+    { $title: req.body.title, $price: req.body.price, $id: id },
+    function (err) {
+      if (err) {
+        return res.status(500).send("Erreur");
+      }
+      res.send("Annonce mise à jour");
+    }
+  );
 });
 
 app.listen(port, () => {
