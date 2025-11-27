@@ -1,4 +1,7 @@
 import express from "express";
+import sqlite3 from "sqlite3";
+
+const db = new sqlite3.Database('db.sqlite');
 
 const app = express();
 const port = 3000;
@@ -32,20 +35,40 @@ let ads = [
 ];
 
 app.get("/", (req, res) => {
-  res.send(ads);
+  db.all("SELECT * FROM ads", (err, rows) => {
+    if (err) {
+    return res.status(500).send("Erreur");
+    }
+    res.send(rows);
+  });
 });
 
 app.post("/ads", (req, res) => {
-    ads.push(req.body);
-    res.send("Request received, check backend terminal");
+  const { title, price } = req.body;
+  db.run(
+    "INSERT INTO ads (title, price) VALUES (?, ?)",
+    [title, price],
+    function (err) {
+      if (err) {
+        return res.status(500).send("Erreur");
+      }
+      res.send("Annonce ajoutée");
+    }
+  );
 });
 
 app.delete("/ads/:id", (req, res) => {
-    const adId = parseInt(req.params.id);
-    const adToDelete = ads.find(ad => ad.id === adId);
-    if (!adToDelete) return res.status(404);
-ads = ads.filter(ad => ad.id !== adToDelete.id);
-    res.send("Ad deleted");
+  const id = parseInt(req.params.id);
+  db.run(
+    "DELETE FROM ads WHERE id = ?",
+    id,
+    function (err) {
+      if (err) {
+        return res.status(500).send("Erreur");
+      }
+      res.send("Annonce supprimée");
+    }
+  );
 });
 
 app.patch("/ads/:id", (req, res) => {
