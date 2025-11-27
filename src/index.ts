@@ -35,7 +35,7 @@ let ads = [
 ];
 
 app.get("/", (req, res) => {
-  db.all("SELECT * FROM ads", (err, rows) => {
+  db.all("SELECT * FROM annonce", (err, rows) => {
     if (err) {
     return res.status(500).send("Erreur");
     }
@@ -44,10 +44,10 @@ app.get("/", (req, res) => {
 });
 
 app.post("/ads", (req, res) => {
-  const { title, price } = req.body;
+  const { title, price, city, description, category_id } = req.body;
   db.run(
-    "INSERT INTO ads (title, price) VALUES (?, ?)",
-    [title, price],
+    "INSERT INTO annonce (title, price, city, description, category_id) VALUES (?, ?, ?, ?, ?)",
+    [title, price, city, description, category_id],
     function (err) {
       if (err) {
         return res.status(500).send("Erreur");
@@ -60,7 +60,7 @@ app.post("/ads", (req, res) => {
 app.delete("/ads/:id", (req, res) => {
   const id = parseInt(req.params.id);
   db.run(
-    "DELETE FROM ads WHERE id = ?",
+    "DELETE FROM annonce WHERE id = ?",
     id,
     function (err) {
       if (err) {
